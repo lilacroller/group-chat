@@ -1,5 +1,5 @@
 import zmq
-
+from threading import Thread
 
 # each cell contains a tuple of form (groupname-ipaddress)
 GroupList= []
@@ -25,6 +25,10 @@ def check4usrrequests():
         outmessage= GroupList2txt()
         socket.send(outmessage.encode())
 
+def check4grprequests():
+    pass
+
 if __name__=="__main__":
     GroupList= [("hinge", "12.30.40"), ("dingy", "12.32.12")]
-    check4usrrequests()
+    thread= Thread(target=check4usrrequests)
+    thread.start()
