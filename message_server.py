@@ -36,7 +36,8 @@ def check4grprequests():
         inmessage= inmessage.decode().split(' - ')
         sendername= inmessage[0]
         senderaddr= inmessage[1]
-        GroupList.append((sendername, senderaddr))
+        if (sendername, senderaddr) not in GroupList:
+            GroupList.append((sendername, senderaddr))
         print(f"JOIN REQUEST FROM {senderaddr}")
         outmessage= "SUCCESS"
         socket.send(outmessage.encode())
