@@ -1,7 +1,7 @@
 import zmq
 from threading import Thread
 
-# each cell contains a tuple of form (groupname-ipaddress)
+# each cell contains a tuple of form (groupname, ipaddress, port)
 GroupList= []
 
 context= zmq.Context()
@@ -9,8 +9,8 @@ def GroupList2txt():
 # returns list of group in text version
     result=""
     for cell in GroupList:
-        result= result + str(cell[0])+ " - " +str(cell[1])+ ", "
-    
+        result= result + str(cell[0])+ " - " +str(cell[1])+ ":"+str(cell[2])+", "
+
     return result
 
 
@@ -35,15 +35,15 @@ def check4grprequests():
         #group will send the message in form of Name - IP:port
         inmessage= inmessage.decode().split(' - ')
         sendername= inmessage[0]
-        senderaddr= inmessage[1]
+        senderaddr= inmessage[1].split(":")[0]
+        senderport= inmessage[1].split(":")[1]
         if (sendername, senderaddr) not in GroupList:
-            GroupList.append((sendername, senderaddr))
+            GroupList.append((sendername, senderaddr, senderport))
         print(f"JOIN REQUEST FROM {senderaddr}")
         outmessage= "SUCCESS"
         socket.send(outmessage.encode())
 
 if __name__=="__main__":
-    GroupList= [("hinge", "12.30.40"), ("dingy", "12.32.12")]
     usrthread= Thread(target= check4usrrequests)
     usrthread.start()
     grpthread= Thread(target= check4grprequests)

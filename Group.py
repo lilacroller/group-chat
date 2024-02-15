@@ -3,17 +3,17 @@ import socket
 from threading import Thread
 import time
 import datetime
+import requests
 
 context= zmq.Context()
 usertele= set()
 messagehistory= [] #stores tuple of form (timestamp, uuid, message)
 currentusers= set()
-nextport= 1201
 
-def MessageServer(name, ip):
+def MessageServer(name, ip, port):
     socket= context.socket(zmq.REQ)
-    socket.connect("tcp://localhost:1233")
-    outmessage= f"{name} - {ip}"
+    socket.connect("tcp://34.131.197.76:1233")
+    outmessage= f"{name} - {ip}:{port}"
     socket.send(outmessage.encode())
     inmessage= socket.recv()
     print(inmessage)
@@ -87,21 +87,20 @@ def chat(port):
                 break
             socket.send("FAILED".encode())
 
-def groupSpawner():
-    global nextport
+def groupSpawner(port):
     socket= context.socket(zmq.REP)
-    socket.bind("tcp://*:1200")
+    socket.bind(f"tcp://*:{port}")
     while True:
         inmessage= socket.recv()
         if inmessage.startswith(b"Join"):
             uuid= inmessage.decode().split(" ")[1]
             if uuid not in usertele:
                 usertele.add(uuid)
-                outmessage= f"SUCCESS {nextport}"
+                outmessage= f"SUCCESS {port+1}"
                 socket.send(outmessage.encode())
-                chatThread= Thread(target=chat, args=(nextport,))
+                chatThread= Thread(target=chat, args=(port+1,))
                 chatThread.start()
-                nextport= nextport+1
+                port= port+1
             else: socket.send("FAILED".encode())
 
 
@@ -142,8 +141,10 @@ def check4usrRequests():
 
 
 if __name__=="__main__":
-    hostname = socket.gethostname()
-    IPAddr = socket.gethostbyname(hostname)
-    MessageServer(hostname, IPAddr)
-    usrrequstThread= Thread(target=groupSpawner)
+    IPAddr = requests.get('https://checkip.amazonaws.com').text.strip()
+    groupname= input("Enter group name:")
+    port= int(input("Enter port no.: "))
+    msthrd= Thread(target=MessageServer, args=(groupname, IPAddr, port))
+    msthrd.start()
+    usrrequstThread= Thread(target=groupSpawner, args=(port, ))
     usrrequstThread.start()
