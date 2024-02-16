@@ -41,7 +41,7 @@ def sendMessage(uuid, message):
         success= True
     return success
 
-#get message format: Get <UUID> timestamp:HH:MM:SS
+#get message format: Get <UUID> timestamp: DD/MM/YYYY HH:MM:SS
 def getMessage(uuid, message):
     if uuid not in usertele:
         return "FAILED"
@@ -51,8 +51,8 @@ def getMessage(uuid, message):
         for a in messagehistory:
             msgs= msgs+", " + str(a)
         return msgs
-    time_string= message[i+10:i+18]
-    epoch_time = int(datetime.datetime.strptime(time_string, "%H:%M:%S").timestamp())
+    time_string= message[i+11:i+30]
+    epoch_time = int(datetime.datetime.strptime(time_string, "%d/%m/%Y %H:%M:%S").timestamp())
     msgs= ""
     for a in messagehistory:
         if a[0]<=epoch_time:
@@ -95,6 +95,7 @@ def groupSpawner(port):
         if inmessage.startswith(b"Join"):
             uuid= inmessage.decode().split(" ")[1]
             if uuid not in usertele:
+                print(f"JOIN REQUEST FROM {uuid}")
                 usertele.add(uuid)
                 outmessage= f"SUCCESS {port+1}"
                 socket.send(outmessage.encode())
