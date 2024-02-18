@@ -55,7 +55,7 @@ def getMessage(uuid, message):
     epoch_time = int(datetime.datetime.strptime(time_string, "%d/%m/%Y %H:%M:%S").timestamp())
     msgs= ""
     for a in messagehistory:
-        if a[0]<=epoch_time:
+        if a[0]>=epoch_time:
             msgs= msgs+", " +  str(a)
     
     return msgs
